@@ -1,23 +1,35 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+import os
 import shutil
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+UPLOAD_DIR = "backend/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @app.get("/")
-def read_root():
-    return {"message": "Deepfake Detector API"}
+def root():
+    return {"message": "Deepfake Detector API radi"}
 
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
-    file_location = f"temp/{file.filename}"
-    
-    with open(file_location, "wb") as buffer:
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # TODO: model inference
-    result = {
+    return {
+        "filename": file.filename,
         "prediction": "fake",
-        "confidence": 0.87
+        "confidence": 0.87,
+        "media_type": file.content_type
     }
-
-    return result
