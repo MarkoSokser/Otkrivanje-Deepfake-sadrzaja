@@ -93,6 +93,63 @@ http://localhost:4200
 
 ---
 
+## Docker Setup
+
+### Install Docker (Linux)
+
+Fedora:
+
+```bash
+sudo dnf install -y moby-engine docker-compose
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+After adding your user to the docker group, log out and log in again (or run `newgrp docker`).
+
+### Install Docker (Windows)
+
+1. Install Docker Desktop from the official Docker website.
+2. During setup, keep WSL2 integration enabled.
+3. Restart your system if prompted.
+4. Open PowerShell and verify:
+
+```powershell
+docker --version
+docker compose version
+```
+
+### Run The Project With Docker
+
+From the `deepfake-detector` project root, run:
+
+```bash
+cd docker
+docker compose up --build
+```
+
+This starts:
+
+* Backend API on `http://localhost:8000`
+* Frontend app on `http://localhost:4200`
+
+To stop containers:
+
+```bash
+docker compose down
+```
+
+---
+
 ## Notes for Team Development
 
 * Always use a virtual environment
