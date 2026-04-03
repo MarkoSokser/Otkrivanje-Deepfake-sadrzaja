@@ -1,0 +1,147 @@
+<div class="max-w-5xl mx-auto py-10 px-4">
+  <h1 class="text-3xl font-bold text-white mb-2">Analiziraj sadržaj</h1>
+  <p class="text-gray-400 mb-8">Učitajte sliku ili videozapis kako biste provjerili je li sadržaj deepfake.</p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Left column: upload + preview -->
+    <div class="flex flex-col gap-6">
+
+      <!-- File upload widget (only when no file selected) -->
+      @if (!selectedFile()) {
+        <app-file-upload
+          (fileSelected)="onFileSelected($event)"
+          (validationError)="onValidationError($event)"
+        />
+      }
+
+      <!-- Preview -->
+      @if (selectedFile(); as f) {
+        <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-lg">
+          <!-- Image preview -->
+          @if (f.type === 'image') {
+            <img
+              [src]="f.preview_url"
+              [alt]="f.file.name"
+              class="w-full max-h-72 object-contain bg-gray-900"
+            />
+          }
+          <!-- Video preview -->
+          @if (f.type === 'video') {
+            <video
+              [src]="f.preview_url"
+              controls
+              class="w-full max-h-72 bg-black"
+            ></video>
+          }
+
+          <!-- File info bar -->
+          <div class="px-5 py-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <span
+                class="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full"
+                [class.bg-blue-900]="f.type === 'image'"
+                [class.text-blue-300]="f.type === 'image'"
+                [class.bg-purple-900]="f.type === 'video'"
+                [class.text-purple-300]="f.type === 'video'"
+              >
+                {{ f.type === 'image' ? 'Slika' : 'Video' }}
+              </span>
+              <p class="text-white text-sm font-medium truncate">{{ f.file.name }}</p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="text-gray-400 text-sm">{{ formatFileSize(f.file.size) }}</span>
+              <button
+                class="text-gray-500 hover:text-red-400 transition-colors duration-200"
+                (click)="removeFile()"
+                title="Ukloni datoteku"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Right column: submit panel -->
+    <div class="flex flex-col gap-5">
+      <div class="bg-gray-800 rounded-2xl p-6 shadow-lg flex flex-col gap-5">
+        <h2 class="text-white font-semibold text-lg">Odabrana datoteka</h2>
+
+        @if (!selectedFile()) {
+          <div class="text-gray-500 text-sm flex items-center gap-2 py-6 justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            Nijedna datoteka nije odabrana
+          </div>
+        } @else {
+          <div class="flex flex-col gap-2 text-sm">
+            <div class="flex justify-between text-gray-400">
+              <span>Naziv:</span>
+              <span class="text-white font-medium truncate max-w-[60%] text-right">{{ selectedFile()!.file.name }}</span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Veličina:</span>
+              <span class="text-white font-medium">{{ formatFileSize(selectedFile()!.file.size) }}</span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Tip:</span>
+              <span class="text-white font-medium">{{ selectedFile()!.type === 'image' ? 'Slika' : 'Videozapis' }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Submit button / loading state -->
+        @if (!isLoading()) {
+          <button
+            class="w-full py-3.5 rounded-xl font-semibold text-white transition-colors duration-200"
+            [class.bg-green-600]="!!selectedFile()"
+            [class.hover:bg-green-700]="!!selectedFile()"
+            [class.bg-gray-600]="!selectedFile()"
+            [class.cursor-not-allowed]="!selectedFile()"
+            [disabled]="!selectedFile()"
+            (click)="submit()"
+          >
+            Analiziraj sadržaj
+          </button>
+        } @else {
+          <div class="flex flex-col items-center gap-3 py-2">
+            <svg
+              class="animate-spin w-8 h-8 text-blue-400"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <span class="text-blue-300 font-medium">Analiziranje...</span>
+            <p class="text-gray-500 text-xs text-center">
+              Obrada može potrajati do 30 sekundi za videozapise.
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- Error message -->
+      @if (errorMessage()) {
+        <div class="bg-red-900 border border-red-500 text-red-200 rounded-xl p-4 flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <div>
+            <p class="font-semibold text-sm mb-1">Greška pri analizi</p>
+            <p class="text-sm">{{ errorMessage() }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
