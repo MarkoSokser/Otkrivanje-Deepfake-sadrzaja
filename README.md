@@ -134,7 +134,7 @@ From the `deepfake-detector` project root, run:
 
 ```bash
 cd docker
-docker compose up --build
+docker compose down && docker compose up --build
 ```
 
 This starts:
