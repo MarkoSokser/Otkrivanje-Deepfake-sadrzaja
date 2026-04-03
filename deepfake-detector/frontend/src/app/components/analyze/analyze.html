@@ -17,21 +17,11 @@
       <!-- Preview -->
       @if (selectedFile(); as f) {
         <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-lg">
-          <!-- Image preview -->
           @if (f.type === 'image') {
-            <img
-              [src]="f.preview_url"
-              [alt]="f.file.name"
-              class="w-full max-h-72 object-contain bg-gray-900"
-            />
+            <img [src]="f.preview_url" [alt]="f.file.name" class="w-full max-h-72 object-contain bg-gray-900" />
           }
-          <!-- Video preview -->
           @if (f.type === 'video') {
-            <video
-              [src]="f.preview_url"
-              controls
-              class="w-full max-h-72 bg-black"
-            ></video>
+            <video [src]="f.preview_url" controls class="w-full max-h-72 bg-black"></video>
           }
 
           <!-- File info bar -->
@@ -95,7 +85,7 @@
           </div>
         }
 
-        <!-- Submit button / loading state -->
+        <!-- Submit button -->
         @if (!isLoading()) {
           <button
             class="w-full py-3.5 rounded-xl font-semibold text-white transition-colors duration-200"
@@ -108,40 +98,77 @@
           >
             Analiziraj sadržaj
           </button>
-        } @else {
-          <div class="flex flex-col items-center gap-3 py-2">
-            <svg
-              class="animate-spin w-8 h-8 text-blue-400"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-              </path>
-            </svg>
-            <span class="text-blue-300 font-medium">Analiziranje...</span>
-            <p class="text-gray-500 text-xs text-center">
+        }
+
+        <!-- Animated loading steps -->
+        @if (isLoading()) {
+          <div class="flex flex-col gap-3 py-2 animate-fade-in-up">
+            <!-- Step 1: Uploading -->
+            <div class="flex items-center gap-3">
+              @if (currentStep() >= 2) {
+                <div class="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              } @else {
+                <svg class="animate-spin w-6 h-6 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              }
+              <span [class.text-green-400]="currentStep() >= 2" [class.text-blue-300]="currentStep() < 2" class="text-sm font-medium">
+                Slanje datoteke...
+              </span>
+            </div>
+
+            <!-- Step 2: Analyzing -->
+            <div class="flex items-center gap-3">
+              @if (currentStep() >= 3) {
+                <div class="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center shrink-0">
+                  <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              } @else if (currentStep() === 2) {
+                <svg class="animate-spin w-6 h-6 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              } @else {
+                <div class="w-6 h-6 rounded-full border-2 border-gray-600 shrink-0"></div>
+              }
+              <span
+                class="text-sm font-medium"
+                [class.text-green-400]="currentStep() >= 3"
+                [class.text-blue-300]="currentStep() === 2"
+                [class.text-gray-500]="currentStep() < 2"
+              >
+                AI analiza sadržaja...
+              </span>
+            </div>
+
+            <!-- Step 3: Results -->
+            <div class="flex items-center gap-3">
+              @if (currentStep() >= 3) {
+                <svg class="animate-spin w-6 h-6 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              } @else {
+                <div class="w-6 h-6 rounded-full border-2 border-gray-600 shrink-0"></div>
+              }
+              <span class="text-sm font-medium" [class.text-blue-300]="currentStep() >= 3" [class.text-gray-500]="currentStep() < 3">
+                Generiranje rezultata...
+              </span>
+            </div>
+
+            <p class="text-gray-600 text-xs text-center mt-1">
               Obrada može potrajati do 30 sekundi za videozapise.
             </p>
           </div>
         }
       </div>
-
-      <!-- Error message -->
-      @if (errorMessage()) {
-        <div class="bg-red-900 border border-red-500 text-red-200 rounded-xl p-4 flex items-start gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-          </svg>
-          <div>
-            <p class="font-semibold text-sm mb-1">Greška pri analizi</p>
-            <p class="text-sm">{{ errorMessage() }}</p>
-          </div>
-        </div>
-      }
     </div>
   </div>
 </div>

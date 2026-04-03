@@ -12,16 +12,16 @@ export class ConfidenceMeterComponent implements OnChanges {
   @Input() label = 'Pouzdanost';
 
   displayValue = 0;
-  barColor = 'bg-green-500';
+  barGradient = 'from-green-500 to-green-400';
 
   ngOnChanges(): void {
     this.displayValue = Math.min(100, Math.max(0, Math.round(this.value)));
     if (this.value <= 40) {
-      this.barColor = 'bg-green-500';
+      this.barGradient = 'from-green-600 to-green-400';
     } else if (this.value <= 70) {
-      this.barColor = 'bg-yellow-500';
+      this.barGradient = 'from-yellow-500 to-orange-400';
     } else {
-      this.barColor = 'bg-red-500';
+      this.barGradient = 'from-orange-500 to-red-500';
     }
   }
 }
