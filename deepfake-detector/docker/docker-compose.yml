@@ -7,7 +7,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ../backend:/app
+      - ../backend:/app:z
+    environment:
+      - PYTHONPATH=/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
 
@@ -19,9 +21,9 @@ services:
     ports:
       - "4200:4200"
     volumes:
-      - ../frontend:/app
+      - ../frontend:/app:z
       - /app/node_modules
-    command: npx ng serve --host 0.0.0.0 --port 4200 --poll 500
+    command: npm run start -- --host 0.0.0.0 --port 4200 --poll 500
     depends_on:
       - backend
     restart: unless-stopped
