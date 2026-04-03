@@ -1,24 +1,31 @@
 <!-- Hero Section -->
-<section class="text-center py-20 px-4">
-  <div class="max-w-3xl mx-auto">
-    <div class="flex justify-center mb-6">
-      <span class="bg-blue-900 text-blue-300 text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-widest">
+<section class="relative text-center py-24 px-4 hero-grid-bg overflow-hidden">
+  <!-- Subtle glow blobs -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative max-w-3xl mx-auto">
+    <div class="flex justify-center mb-6 animate-fade-in-up">
+      <span class="bg-blue-900/80 text-blue-300 text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-700/50">
         AI Detekcija · Slike &amp; Video
       </span>
     </div>
-    <h1 class="text-5xl font-extrabold text-white mb-5 leading-tight">
-      Otkrij <span class="text-blue-400">deepfake</span> sadržaj
+    <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-5 leading-tight animate-fade-in-up-delay-1">
+      Otkrij <span class="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">deepfake</span> sadržaj
     </h1>
-    <p class="text-gray-400 text-xl mb-10 leading-relaxed">
+    <p class="text-gray-400 text-xl mb-10 leading-relaxed animate-fade-in-up-delay-2">
       Analizirajte slike i videozapise pomoću AI modela u nekoliko sekundi.
       Saznajte je li sadržaj autentičan ili manipuliran.
     </p>
-    <a
-      routerLink="/analyze"
-      class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-lg font-semibold transition-colors duration-200 shadow-lg shadow-blue-900/40"
-    >
-      Analiziraj sadržaj
-    </a>
+    <div class="animate-fade-in-up-delay-3">
+      <a
+        routerLink="/analyze"
+        class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl text-lg font-semibold transition-colors duration-200 shadow-lg shadow-blue-900/50 animate-pulse-glow"
+      >
+        Analiziraj sadržaj
+      </a>
+    </div>
   </div>
 </section>
 
@@ -28,8 +35,8 @@
     <h2 class="text-2xl font-bold text-white text-center mb-10">Kako funkcionira?</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Step 1 -->
-      <div class="bg-gray-800 rounded-2xl p-6 flex flex-col items-center gap-3 text-center shadow-lg">
-        <div class="bg-blue-900 rounded-full w-12 h-12 flex items-center justify-center text-blue-300 text-xl font-bold">
+      <div class="bg-gray-800 rounded-2xl p-6 flex flex-col items-center gap-3 text-center shadow-lg hover:-translate-y-1 hover:shadow-blue-900/30 hover:shadow-xl transition-all duration-200">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-900 rounded-full w-12 h-12 flex items-center justify-center text-white text-xl font-bold shadow-md">
           1
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -41,21 +48,21 @@
       </div>
 
       <!-- Step 2 -->
-      <div class="bg-gray-800 rounded-2xl p-6 flex flex-col items-center gap-3 text-center shadow-lg">
-        <div class="bg-blue-900 rounded-full w-12 h-12 flex items-center justify-center text-blue-300 text-xl font-bold">
+      <div class="bg-gray-800 rounded-2xl p-6 flex flex-col items-center gap-3 text-center shadow-lg hover:-translate-y-1 hover:shadow-blue-900/30 hover:shadow-xl transition-all duration-200">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-900 rounded-full w-12 h-12 flex items-center justify-center text-white text-xl font-bold shadow-md">
           2
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round"
-            d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 01-.659 1.591L9.5 14.5m4.5-11.396a24.301 24.301 0 01.75.082m-4.5 0c.998-.049 1.992-.075 2.99-.075m1.51.075c-.251.023-.501.05-.75.082M9.5 14.5l4-4m0 0l4-4M9.5 14.5l4 4m0 0l4-4" />
+            d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
         </svg>
         <h3 class="text-white font-semibold text-lg">AI analizira sadržaj</h3>
         <p class="text-gray-400 text-sm">Naš model prolazi kroz sadržaj i traži znakove manipulacije.</p>
       </div>
 
       <!-- Step 3 -->
-      <div class="bg-gray-800 rounded-2xl p-6 flex flex-col items-center gap-3 text-center shadow-lg">
-        <div class="bg-blue-900 rounded-full w-12 h-12 flex items-center justify-center text-blue-300 text-xl font-bold">
+      <div class="bg-gray-800 rounded-2xl p-6 flex flex-col items-center gap-3 text-center shadow-lg hover:-translate-y-1 hover:shadow-blue-900/30 hover:shadow-xl transition-all duration-200">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-900 rounded-full w-12 h-12 flex items-center justify-center text-white text-xl font-bold shadow-md">
           3
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -72,13 +79,42 @@
 <!-- Supported formats -->
 <section class="py-10 px-4">
   <div class="max-w-2xl mx-auto text-center">
-    <h2 class="text-lg font-semibold text-gray-400 mb-5 uppercase tracking-widest text-sm">
+    <h2 class="text-sm font-semibold text-gray-500 mb-5 uppercase tracking-widest">
       Podržani formati
     </h2>
     <div class="flex flex-wrap justify-center gap-3">
-      @for (fmt of ['.jpg', '.jpeg', '.png', '.mp4', '.mov']; track fmt) {
-        <span class="bg-gray-700 text-gray-200 rounded-full px-4 py-1.5 text-sm font-mono">{{ fmt }}</span>
-      }
+      <!-- Image formats -->
+      <span class="flex items-center gap-1.5 bg-gray-700/80 text-gray-200 rounded-full px-4 py-1.5 text-sm font-mono border border-gray-600/40">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        .jpg
+      </span>
+      <span class="flex items-center gap-1.5 bg-gray-700/80 text-gray-200 rounded-full px-4 py-1.5 text-sm font-mono border border-gray-600/40">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        .jpeg
+      </span>
+      <span class="flex items-center gap-1.5 bg-gray-700/80 text-gray-200 rounded-full px-4 py-1.5 text-sm font-mono border border-gray-600/40">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        .png
+      </span>
+      <!-- Video formats -->
+      <span class="flex items-center gap-1.5 bg-gray-700/80 text-gray-200 rounded-full px-4 py-1.5 text-sm font-mono border border-gray-600/40">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+        .mp4
+      </span>
+      <span class="flex items-center gap-1.5 bg-gray-700/80 text-gray-200 rounded-full px-4 py-1.5 text-sm font-mono border border-gray-600/40">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+        .mov
+      </span>
     </div>
   </div>
 </section>
@@ -87,19 +123,66 @@
 <section class="py-14 px-4 border-t border-gray-800">
   <div class="max-w-4xl mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-      <div class="p-6">
-        <p class="text-4xl font-extrabold text-blue-400 mb-2">8M+</p>
-        <p class="text-gray-400 text-sm">deepfake datoteka stvoreno u 2025. godini</p>
+      <div class="p-6 flex flex-col items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-1 h-12 bg-blue-500 rounded-full"></div>
+          <div class="text-left">
+            <p class="text-4xl font-extrabold text-blue-400">8M+</p>
+            <p class="text-gray-400 text-sm mt-1">deepfake datoteka stvoreno u 2025.</p>
+          </div>
+        </div>
       </div>
-      <div class="p-6">
-        <p class="text-4xl font-extrabold text-yellow-400 mb-2">68%</p>
-        <p class="text-gray-400 text-sm">teško ili gotovo nemoguće razlikovati od stvarnog</p>
+      <div class="p-6 flex flex-col items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-1 h-12 bg-yellow-500 rounded-full"></div>
+          <div class="text-left">
+            <p class="text-4xl font-extrabold text-yellow-400">68%</p>
+            <p class="text-gray-400 text-sm mt-1">gotovo nemoguće razlikovati od stvarnog</p>
+          </div>
+        </div>
       </div>
-      <div class="p-6">
-        <p class="text-4xl font-extrabold text-red-400 mb-2">46%</p>
-        <p class="text-gray-400 text-sm">svih deepfake napada su videozapisi</p>
+      <div class="p-6 flex flex-col items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-1 h-12 bg-red-500 rounded-full"></div>
+          <div class="text-left">
+            <p class="text-4xl font-extrabold text-red-400">46%</p>
+            <p class="text-gray-400 text-sm mt-1">svih deepfake napada su videozapisi</p>
+          </div>
+        </div>
       </div>
     </div>
     <p class="text-center text-gray-600 text-xs mt-6">Izvor: Programs.com – The Latest Deepfake Facts &amp; Statistics (2026.)</p>
+  </div>
+</section>
+
+<!-- FAQ section -->
+<section class="py-14 px-4 border-t border-gray-800">
+  <div class="max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold text-white text-center mb-8">Često postavljana pitanja</h2>
+    <div class="flex flex-col gap-3">
+      @for (faq of faqs; track $index) {
+        <div class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700/50">
+          <button
+            class="w-full px-6 py-4 flex items-center justify-between text-left gap-4 hover:bg-gray-750 transition-colors duration-150"
+            (click)="toggleFaq($index)"
+          >
+            <span class="text-white font-medium">{{ faq.question }}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 text-gray-400 shrink-0 transition-transform duration-200"
+              [class.rotate-180]="openFaqIndex() === $index"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          @if (openFaqIndex() === $index) {
+            <div class="px-6 pb-5 border-t border-gray-700/50 pt-4 animate-fade-in-up">
+              <p class="text-gray-400 text-sm leading-relaxed">{{ faq.answer }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </div>
 </section>
