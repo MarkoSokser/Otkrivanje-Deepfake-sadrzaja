@@ -1,0 +1,13 @@
+<div class="w-full">
+  <div class="flex justify-between items-center mb-2">
+    <span class="text-gray-300 text-sm font-medium">{{ label }}</span>
+    <span class="text-white font-bold text-lg">{{ displayValue }}%</span>
+  </div>
+  <div class="bg-gray-700 rounded-full h-4 overflow-hidden">
+    <div
+      class="h-4 rounded-full transition-all duration-700 ease-out"
+      [class]="barColor"
+      [style.width.%]="displayValue"
+    ></div>
+  </div>
+</div>
