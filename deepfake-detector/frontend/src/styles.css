@@ -1,3 +1,80 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+/* Font */
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fade-in-up animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+.animate-fade-in-up-delay-1 {
+  animation: fadeInUp 0.6s ease-out 0.15s both;
+}
+.animate-fade-in-up-delay-2 {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+.animate-fade-in-up-delay-3 {
+  animation: fadeInUp 0.6s ease-out 0.45s both;
+}
+
+/* Pulse glow for CTA button */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Hero dot grid background */
+.hero-grid-bg {
+  background-image: radial-gradient(circle, rgba(59, 130, 246, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Toast slide-in animation */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out both;
+}
+
+/* Bounce once for verdict icon */
+@keyframes bounceOnce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-12px); }
+  60% { transform: translateY(-5px); }
+}
+
+.animate-bounce-once {
+  animation: bounceOnce 0.7s ease-out both;
+}

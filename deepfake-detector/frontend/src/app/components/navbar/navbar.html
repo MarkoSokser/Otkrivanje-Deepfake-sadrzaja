@@ -1,0 +1,87 @@
+<nav class="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700/60 shadow-lg">
+  <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+    <!-- Logo -->
+    <a routerLink="/" class="flex items-center gap-2" (click)="closeMenu()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+      </svg>
+      <span class="font-bold text-xl bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent">DeepfakeDetector</span>
+    </a>
+
+    <!-- Desktop nav links -->
+    <div class="hidden md:flex items-center gap-4">
+      <a
+        routerLink="/"
+        routerLinkActive="text-white font-semibold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+        (click)="closeMenu()"
+      >
+        Početna
+      </a>
+      <a
+        routerLink="/history"
+        routerLinkActive="text-white font-semibold"
+        class="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+        (click)="closeMenu()"
+      >
+        Povijest
+      </a>
+      <a
+        routerLink="/analyze"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200"
+        (click)="closeMenu()"
+      >
+        Analiza
+      </a>
+    </div>
+
+    <!-- Mobile hamburger button -->
+    <button
+      class="md:hidden text-gray-300 hover:text-white focus:outline-none"
+      (click)="toggleMenu()"
+      aria-label="Toggle menu"
+    >
+      @if (menuOpen()) {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      }
+    </button>
+  </div>
+
+  <!-- Mobile dropdown menu -->
+  @if (menuOpen()) {
+    <div class="md:hidden bg-gray-800/95 backdrop-blur-sm border-t border-gray-700/60 px-4 py-3 flex flex-col gap-2">
+      <a
+        routerLink="/"
+        routerLinkActive="text-blue-400 font-semibold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="text-gray-300 hover:text-white transition-colors duration-200 py-2"
+        (click)="closeMenu()"
+      >
+        Početna
+      </a>
+      <a
+        routerLink="/history"
+        routerLinkActive="text-blue-400 font-semibold"
+        class="text-gray-300 hover:text-white transition-colors duration-200 py-2"
+        (click)="closeMenu()"
+      >
+        Povijest
+      </a>
+      <a
+        routerLink="/analyze"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-center transition-colors duration-200 mt-1"
+        (click)="closeMenu()"
+      >
+        Analiza
+      </a>
+    </div>
+  }
+</nav>
