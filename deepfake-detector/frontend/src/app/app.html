@@ -1,4 +1,8 @@
-<app-navbar />
-<main class="container mx-auto px-4 py-8">
-  <router-outlet />
-</main>
+<div class="min-h-screen flex flex-col">
+  <app-navbar />
+  <main class="flex-1">
+    <router-outlet />
+  </main>
+  <app-footer />
+  <app-toast />
+</div>
