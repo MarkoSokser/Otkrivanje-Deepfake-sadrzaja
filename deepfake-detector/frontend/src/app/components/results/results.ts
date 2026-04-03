@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AnalysisStateService } from '../../services/analysis-state.service';
 import { AnalysisResult, UploadedFile } from '../../models/analysis-result.model';
@@ -7,7 +8,7 @@ import { ConfidenceMeterComponent } from '../confidence-meter/confidence-meter';
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [RouterLink, ConfidenceMeterComponent],
+  imports: [RouterLink, ConfidenceMeterComponent, DecimalPipe],
   templateUrl: './results.html',
   styleUrl: './results.css',
 })
