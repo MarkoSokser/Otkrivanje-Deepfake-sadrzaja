@@ -8,3 +8,5 @@ numpy>=1.26.0
 # AI / ML
 torch>=2.2.0
 torchvision>=0.17.0
+transformers
+huggingface_hub
