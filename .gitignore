@@ -1,28 +1,65 @@
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
-.angular/
+# =========================
+# Angular / Frontend
+# =========================
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.angular/
+/frontend/out-tsc/
+/frontend/tmp/
+/frontend/coverage/
 
-# Node modules and dependency files
-/node_modules/
-/package-lock.json
-/yarn.lock
-
-# Environment files
-/.env
-
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Logs
+# =========================
+# Node / General
+# =========================
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
+
+# =========================
+# Python / Backend
+# =========================
+venv/
+backend/venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+# Uploads / Temporary files
+# =========================
+uploads/
+backend/uploads/
+
+# =========================
+# AI Models / Data (VAŽNO)
+# =========================
+ai_models/weights/
+*.pth
+*.pt
+*.h5
+
+data/
+*.zip
+
+# =========================
+# Environment files
+# =========================
+.env
+*.env
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/

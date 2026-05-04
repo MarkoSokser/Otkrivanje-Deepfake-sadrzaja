@@ -1,0 +1,46 @@
+<div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+  @for (toast of toasts; track trackById($index, toast)) {
+    <div
+      class="animate-slide-in-right pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl border text-sm font-medium min-w-64 max-w-80"
+      [class.bg-green-900]="toast.type === 'success'"
+      [class.border-green-600]="toast.type === 'success'"
+      [class.text-green-200]="toast.type === 'success'"
+      [class.bg-red-900]="toast.type === 'error'"
+      [class.border-red-600]="toast.type === 'error'"
+      [class.text-red-200]="toast.type === 'error'"
+      [class.bg-blue-900]="toast.type === 'info'"
+      [class.border-blue-600]="toast.type === 'info'"
+      [class.text-blue-200]="toast.type === 'info'"
+    >
+      <!-- Icon -->
+      @if (toast.type === 'success') {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-green-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      }
+      @if (toast.type === 'error') {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+      }
+      @if (toast.type === 'info') {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+        </svg>
+      }
+
+      <span class="flex-1">{{ toast.message }}</span>
+
+      <!-- Dismiss -->
+      <button
+        class="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+        (click)="dismiss(toast.id)"
+        aria-label="Zatvori"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  }
+</div>
