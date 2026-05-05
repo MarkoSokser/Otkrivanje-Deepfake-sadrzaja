@@ -53,23 +53,8 @@ AVAILABLE_MODELS = {
             "ViT image-classification model za real/deepfake klasifikaciju. "
             "Za video se koristi frame-based analiza."
         )
-    },
-    "ensemble": {
-        "key": "ensemble",
-        "name": "Weighted Ensemble",
-        "provider": "Local backend",
-        "type": "ensemble",
-        "supports": ["image", "video"],
-        "video_mode": "frame_based",
-        "dataset": "Combination of selected model datasets",
-        "description": (
-            "Pokreće više dostupnih modela i kombinira njihove rezultate u jedan odgovor."
-        )
     }
 }
-
-
-DEFAULT_MODEL_KEY = "ensemble"
 
 
 ENSEMBLE_MODEL_KEYS = [
@@ -81,10 +66,10 @@ ENSEMBLE_MODEL_KEYS = [
 
 
 ENSEMBLE_WEIGHTS = {
-    "efficientnet_ffpp_c23": 0.35,
+    "efficientnet_ffpp_c23": 0.25,
     "opendeepfake_siglip": 0.25,
     "deepfake_detector_v1": 0.25,
-    "vit_deepfake_v2": 0.15
+    "vit_deepfake_v2": 0.25
 }
 
 
@@ -94,7 +79,3 @@ def get_model_info(model_key: str) -> dict | None:
 
 def get_available_models() -> list[dict]:
     return list(AVAILABLE_MODELS.values())
-
-
-def is_valid_model_key(model_key: str) -> bool:
-    return model_key in AVAILABLE_MODELS
