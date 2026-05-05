@@ -61,25 +61,18 @@ AVAILABLE_MODELS = {
         "description": (
             "ViT image-classification model za real/deepfake klasifikaciju. "
             "Za video se koristi frame-based analiza."
-        )
-    }
+        ),
+        "image_rank": 4,
+        "video_rank": 4,
+        "image_rank_reason": "Skup podataka za trening nije javno dokumentiran; niža pouzdanost.",
+        "video_rank_reason": "Skup podataka za trening nije javno dokumentiran; nije optimiziran za video okvire.",
+    },
 }
 
 
-ENSEMBLE_MODEL_KEYS = [
-    "efficientnet_ffpp_c23",
-    "opendeepfake_siglip",
-    "deepfake_detector_v1",
-    "vit_deepfake_v2"
-]
+ENSEMBLE_MODEL_KEYS = list(AVAILABLE_MODELS.keys())
 
-
-ENSEMBLE_WEIGHTS = {
-    "efficientnet_ffpp_c23": 0.25,
-    "opendeepfake_siglip": 0.25,
-    "deepfake_detector_v1": 0.25,
-    "vit_deepfake_v2": 0.25
-}
+ENSEMBLE_WEIGHTS = {k: 1 / len(ENSEMBLE_MODEL_KEYS) for k in ENSEMBLE_MODEL_KEYS}
 
 
 def get_model_info(model_key: str) -> dict | None:
@@ -90,4 +83,4 @@ def get_model_info(model_key: str) -> dict | None:
 
 
 def get_available_models() -> list[dict]:
-    return list(AVAILABLE_MODELS.values())
+    return [{"key": k, **v} for k, v in AVAILABLE_MODELS.items()]
