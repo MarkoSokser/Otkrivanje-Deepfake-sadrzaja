@@ -7,7 +7,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
 from torchvision import models, transforms
-from transformers import AutoImageProcessor, AutoModelForImageClassification
+from transformers import (
+    AutoImageProcessor,
+    AutoModelForImageClassification,
+    CLIPForImageClassification,
+    CLIPProcessor,
+)
 
 from app.services.model_registry import (
     ENSEMBLE_MODEL_KEYS,
@@ -111,21 +116,26 @@ def load_efficientnet_model():
     return loaded_model
 
 
-def load_hf_image_model(model_key: str, model_id: str):
+def load_hf_image_model(
+    model_key: str,
+    model_id: str,
+    processor_id: str | None = None,
+    model_type: str | None = None,
+):
     if model_key in _loaded_models:
         return _loaded_models[model_key]
 
-    processor = AutoImageProcessor.from_pretrained(model_id)
-    loaded_model = AutoModelForImageClassification.from_pretrained(model_id)
+    if model_type == "clip":
+        processor = CLIPProcessor.from_pretrained(processor_id or model_id)
+        loaded_model = CLIPForImageClassification.from_pretrained(model_id)
+    else:
+        processor = AutoImageProcessor.from_pretrained(processor_id or model_id)
+        loaded_model = AutoModelForImageClassification.from_pretrained(model_id)
 
     loaded_model.to(DEVICE)
     loaded_model.eval()
 
-    _loaded_models[model_key] = {
-        "processor": processor,
-        "model": loaded_model
-    }
-
+    _loaded_models[model_key] = {"processor": processor, "model": loaded_model}
     return _loaded_models[model_key]
 
 
@@ -196,18 +206,19 @@ def build_single_model_response(
     label = label_from_probability(fake_probability)
     confidence = confidence_from_label(label, fake_probability)
 
+    fake_pct = round(fake_probability * 100, 1)
+
     if label == "deepfake":
-        explanation = (
-            "Model procjenjuje visoku vjerojatnost deepfake ili AI-manipuliranog sadržaja."
-        )
+        explanation = f"Model detektira deepfake — vjerojatnost manipulacije: {fake_pct}%."
     elif label == "suspicious":
-        explanation = (
-            "Model nije dovoljno siguran za deepfake oznaku, ali rezultat upućuje na moguću manipulaciju."
-        )
+        explanation = f"Model uočava moguću manipulaciju ({fake_pct}%), ali bez dovoljno visokog praga za sigurnu deepfake oznaku."
     else:
-        explanation = (
-            "Model procjenjuje da sadržaj više odgovara autentičnom sadržaju."
-        )
+        explanation = f"Model procjenjuje sadržaj kao autentičan — vjerojatnost manipulacije: {fake_pct}%."
+
+    if face_detected is True:
+        explanation += " Lice je detektirano i korišteno u analizi."
+    elif face_detected is False:
+        explanation += " Lice nije detektirano; analizirana je cijela slika."
 
     return {
         "label": label,
@@ -267,7 +278,9 @@ def analyze_with_hf_image_model(file_path: Path, model_key: str) -> dict:
 
     image = Image.open(file_path).convert("RGB")
 
-    loaded = load_hf_image_model(model_key, model_id)
+    processor_id = model_info.get("processor_id")
+    model_type = model_info.get("model_type")
+    loaded = load_hf_image_model(model_key, model_id, processor_id=processor_id, model_type=model_type)
     processor = loaded["processor"]
     model = loaded["model"]
 
