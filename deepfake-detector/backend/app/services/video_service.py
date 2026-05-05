@@ -4,7 +4,6 @@ import uuid
 import cv2
 
 from app.services.image_service import analyze_image, label_from_probability, confidence_from_label
-from app.services.model_registry import ENSEMBLE_MODEL_KEYS, ENSEMBLE_WEIGHTS, get_model_info
 
 
 MAX_FRAMES_TO_ANALYZE = 20
@@ -47,78 +46,6 @@ def label_from_video_statistics(
         return "suspicious"
 
     return "authentic"
-
-
-def aggregate_per_model_results(frame_results: list[dict]) -> list[dict]:
-    model_data: dict[str, list[dict]] = {key: [] for key in ENSEMBLE_MODEL_KEYS}
-
-    for frame in frame_results:
-        for mr in (frame.get("model_results") or []):
-            key = mr.get("model_key")
-            if key in model_data and mr.get("label") != "error":
-                model_data[key].append(mr)
-
-    aggregated = []
-    for model_key in ENSEMBLE_MODEL_KEYS:
-        valid = model_data[model_key]
-        info = get_model_info(model_key)
-        name = info["name"] if info else model_key
-        dataset = info["dataset"] if info else ""
-
-        if not valid:
-            aggregated.append({
-                "label": "error",
-                "is_deepfake": None,
-                "is_suspicious": None,
-                "real_probability": None,
-                "deepfake_probability": None,
-                "confidence_percent": None,
-                "model_key": model_key,
-                "model": name,
-                "dataset": dataset,
-                "device": "cpu",
-                "raw_predicted_label": "error",
-                "face_detected": None,
-                "weight": ENSEMBLE_WEIGHTS.get(model_key, 0.25),
-                "explanation": "Model nije dao valjane rezultate ni za jedan frame.",
-            })
-            continue
-
-        avg_fake = sum(r["deepfake_probability"] for r in valid) / len(valid)
-        label = label_from_probability(avg_fake)
-        confidence = confidence_from_label(label, avg_fake)
-        face_detected = any(r.get("face_detected") for r in valid) or None
-        fake_pct = round(avg_fake * 100, 1)
-        n = len(valid)
-
-        if label == "deepfake":
-            explanation = f"Model detektira deepfake — prosječna vjerojatnost manipulacije: {fake_pct}% kroz {n} frameva."
-        elif label == "suspicious":
-            explanation = f"Model uočava moguću manipulaciju ({fake_pct}%) kroz {n} frameva, bez visokog praga pouzdanosti."
-        else:
-            explanation = f"Model procjenjuje sadržaj kao autentičan — prosječna vjerojatnost manipulacije: {fake_pct}% kroz {n} frameva."
-
-        if any(r.get("face_detected") for r in valid):
-            explanation += " Lice je detektirano u barem jednom frameu."
-
-        aggregated.append({
-            "label": label,
-            "is_deepfake": label == "deepfake",
-            "is_suspicious": label == "suspicious",
-            "real_probability": round(1.0 - avg_fake, 4),
-            "deepfake_probability": round(avg_fake, 4),
-            "confidence_percent": round(confidence * 100, 2),
-            "model_key": model_key,
-            "model": name,
-            "dataset": dataset,
-            "device": valid[0].get("device", "cpu"),
-            "raw_predicted_label": label,
-            "face_detected": face_detected,
-            "weight": ENSEMBLE_WEIGHTS.get(model_key, 0.25),
-            "explanation": explanation,
-        })
-
-    return aggregated
 
 
 def combine_video_frame_results(frame_results: list[dict]) -> dict:
@@ -301,14 +228,10 @@ def analyze_video(file_path: Path) -> dict:
         reverse=True
     )[:3]
 
-    models_used = frame_results[0].get("models_used", len(ENSEMBLE_MODEL_KEYS)) if frame_results else len(ENSEMBLE_MODEL_KEYS)
-
     return {
         **combined_result,
         "frames_analyzed": frames_analyzed,
         "total_frames": total_frames,
-        "models_used": models_used,
-        "model_results": [],
         "model": "Frame-based equal-weight ensemble of four deepfake detectors",
         "frame_results": frame_results,
         "most_suspicious_frames": most_suspicious_frames,
