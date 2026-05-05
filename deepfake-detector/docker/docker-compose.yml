@@ -7,9 +7,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ../backend:/app:z
+      - ../backend:/app
+      - backend_uploads:/app/uploads
+      - hf_cache:/cache/huggingface
+      - torch_cache:/cache/torch
     environment:
       - PYTHONPATH=/app
+      - HF_HOME=/cache/huggingface
+      - TRANSFORMERS_CACHE=/cache/huggingface
+      - TORCH_HOME=/cache/torch
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
 
@@ -27,3 +33,8 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+volumes:
+  backend_uploads:
+  hf_cache:
+  torch_cache:

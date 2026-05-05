@@ -1,7 +1,7 @@
 from pathlib import Path
 
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
-VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi"}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".webm", ".mkv"}
 
 
 def detect_media_type(file_path: Path) -> str:

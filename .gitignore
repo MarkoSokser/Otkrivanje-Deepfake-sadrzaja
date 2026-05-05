@@ -50,6 +50,7 @@ data/
 # Environment files
 # =========================
 .env
+*.env
 
 # =========================
 # OS files

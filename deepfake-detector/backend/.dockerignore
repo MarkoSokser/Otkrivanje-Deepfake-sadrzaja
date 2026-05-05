@@ -1,0 +1,17 @@
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+uploads/
+.env
+
+.cache/
+.pytest_cache/
+
+*.pth
+*.pt
+*.h5
