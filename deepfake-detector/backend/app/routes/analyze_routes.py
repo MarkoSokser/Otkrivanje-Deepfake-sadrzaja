@@ -1,15 +1,11 @@
 from pathlib import Path
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
 from app.services.media_service import detect_media_type
 from app.services.image_service import analyze_image
 from app.services.video_service import analyze_video
-from app.services.model_registry import (
-    DEFAULT_MODEL_KEY,
-    get_available_models,
-    is_valid_model_key,
-)
+from app.services.model_registry import get_available_models
 from app.utils.file_utils import save_upload_file, validate_file_extension
 
 router = APIRouter()
@@ -30,16 +26,17 @@ ALLOWED_EXTENSIONS = {
 @router.get("/models")
 def get_models():
     return {
-        "default_model_key": DEFAULT_MODEL_KEY,
+        "analysis_mode": "equal_weight_ensemble",
+        "description": (
+            "Sustav uvijek pokreće sva četiri dostupna modela. "
+            "Konačni rezultat računa se kao prosjek njihovih deepfake vjerojatnosti "
+            "s jednakim težinama."
+        ),
         "available_models": get_available_models(),
         "usage": {
             "endpoint": "POST /analyze",
             "form_fields": {
-                "file": "Slika ili video datoteka.",
-                "model_key": (
-                    "Opcionalno. Jedan od dostupnih model_key vrijednosti. "
-                    "Ako nije poslano, koristi se ensemble."
-                )
+                "file": "Slika ili video datoteka. Naziv modela se više ne šalje jer se uvijek koriste sva četiri modela."
             }
         },
         "labels": {
@@ -52,10 +49,7 @@ def get_models():
 
 
 @router.post("/analyze")
-async def analyze(
-    file: UploadFile = File(...),
-    model_key: str = Form(DEFAULT_MODEL_KEY)
-):
+async def analyze(file: UploadFile = File(...)):
     extension = Path(file.filename).suffix.lower()
 
     if not validate_file_extension(extension, ALLOWED_EXTENSIONS):
@@ -67,23 +61,14 @@ async def analyze(
             )
         )
 
-    if not is_valid_model_key(model_key):
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"Nepoznat model_key: {model_key}. "
-                "Dostupne modele možeš vidjeti na GET /models."
-            )
-        )
-
     saved_path = save_upload_file(file)
 
     media_type = detect_media_type(saved_path)
 
     if media_type == "image":
-        result = analyze_image(saved_path, model_key=model_key)
+        result = analyze_image(saved_path)
     elif media_type == "video":
-        result = analyze_video(saved_path, model_key=model_key)
+        result = analyze_video(saved_path)
     else:
         raise HTTPException(
             status_code=400,
@@ -93,7 +78,8 @@ async def analyze(
     return {
         "filename": file.filename,
         "media_type": media_type,
-        "requested_model_key": model_key,
+        "analysis_mode": "equal_weight_ensemble",
+        "models_used": result.get("models_used"),
         "is_deepfake": result.get("is_deepfake"),
         "is_suspicious": result.get("is_suspicious"),
         "label": result.get("label"),

@@ -10,7 +10,6 @@ from torchvision import models, transforms
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 
 from app.services.model_registry import (
-    DEFAULT_MODEL_KEY,
     ENSEMBLE_MODEL_KEYS,
     ENSEMBLE_WEIGHTS,
     get_model_info,
@@ -88,8 +87,10 @@ def crop_face_if_detected(image: Image.Image) -> tuple[Image.Image, bool]:
 
 
 def load_efficientnet_model():
-    if "efficientnet_ffpp_c23" in _loaded_models:
-        return _loaded_models["efficientnet_ffpp_c23"]
+    model_key = "efficientnet_ffpp_c23"
+
+    if model_key in _loaded_models:
+        return _loaded_models[model_key]
 
     state_dict = torch.hub.load_state_dict_from_url(
         EFFNET_MODEL_URL,
@@ -106,7 +107,7 @@ def load_efficientnet_model():
     loaded_model.to(DEVICE)
     loaded_model.eval()
 
-    _loaded_models["efficientnet_ffpp_c23"] = loaded_model
+    _loaded_models[model_key] = loaded_model
     return loaded_model
 
 
@@ -221,6 +222,7 @@ def build_single_model_response(
         "device": DEVICE,
         "raw_predicted_label": raw_predicted_label,
         "face_detected": face_detected,
+        "weight": ENSEMBLE_WEIGHTS.get(model_key, 0.25),
         "explanation": explanation
     }
 
@@ -295,11 +297,18 @@ def analyze_with_hf_image_model(file_path: Path, model_key: str) -> dict:
     )
 
 
-def combine_ensemble_results(model_results: list[dict]) -> dict:
+def analyze_single_image_model(file_path: Path, model_key: str) -> dict:
+    if model_key == "efficientnet_ffpp_c23":
+        return analyze_with_efficientnet(file_path)
+
+    return analyze_with_hf_image_model(file_path, model_key)
+
+
+def combine_model_results(model_results: list[dict]) -> dict:
     valid_results = [
         result for result in model_results
-        if result.get("deepfake_probability") is not None
-        and result.get("label") != "error"
+        if result.get("label") != "error"
+        and result.get("deepfake_probability") is not None
     ]
 
     if not valid_results:
@@ -310,23 +319,18 @@ def combine_ensemble_results(model_results: list[dict]) -> dict:
             "real_probability": None,
             "deepfake_probability": None,
             "confidence_percent": None,
-            "model_key": "ensemble",
-            "model": "Weighted Ensemble",
+            "models_used": 0,
             "model_results": model_results,
             "explanation": "Nijedan model nije uspješno vratio rezultat."
         }
 
     total_weight = sum(
-        ENSEMBLE_WEIGHTS.get(result["model_key"], 0.0)
+        ENSEMBLE_WEIGHTS.get(result["model_key"], 0.25)
         for result in valid_results
     )
 
-    if total_weight <= 0:
-        total_weight = len(valid_results)
-
     fake_probability = sum(
-        result["deepfake_probability"]
-        * ENSEMBLE_WEIGHTS.get(result["model_key"], 1.0)
+        result["deepfake_probability"] * ENSEMBLE_WEIGHTS.get(result["model_key"], 0.25)
         for result in valid_results
     ) / total_weight
 
@@ -341,15 +345,15 @@ def combine_ensemble_results(model_results: list[dict]) -> dict:
 
     if label == "deepfake":
         explanation = (
-            "Kombinirani rezultat više modela ukazuje na visoku vjerojatnost deepfake sadržaja."
+            "Kombinirani rezultat četiri modela ukazuje na visoku vjerojatnost deepfake sadržaja."
         )
     elif label == "suspicious":
         explanation = (
-            "Kombinirani rezultat je sumnjiv, ali nije dovoljno visok za sigurnu deepfake oznaku."
+            "Kombinirani rezultat četiri modela je sumnjiv, ali nije dovoljno visok za sigurnu deepfake oznaku."
         )
     else:
         explanation = (
-            "Kombinirani rezultat više odgovara autentičnom sadržaju."
+            "Kombinirani rezultat četiri modela više odgovara autentičnom sadržaju."
         )
 
     explanation += (
@@ -364,29 +368,39 @@ def combine_ensemble_results(model_results: list[dict]) -> dict:
         "real_probability": round(real_probability, 4),
         "deepfake_probability": round(fake_probability, 4),
         "confidence_percent": round(confidence * 100, 2),
-        "model_key": "ensemble",
-        "model": "Weighted Ensemble",
         "models_used": len(valid_results),
+        "model": "Equal-weight ensemble of four deepfake detectors",
+        "ensemble_weights": ENSEMBLE_WEIGHTS,
         "device": DEVICE,
         "model_results": model_results,
         "explanation": explanation
     }
 
 
-def analyze_image(file_path: Path, model_key: str = DEFAULT_MODEL_KEY) -> dict:
+def analyze_image(file_path: Path) -> dict:
     try:
-        if model_key == "ensemble":
-            model_results = [
-                analyze_image(file_path, single_model_key)
-                for single_model_key in ENSEMBLE_MODEL_KEYS
-            ]
+        model_results = []
 
-            return combine_ensemble_results(model_results)
+        for model_key in ENSEMBLE_MODEL_KEYS:
+            try:
+                result = analyze_single_image_model(file_path, model_key)
+            except Exception as error:
+                result = {
+                    "label": "error",
+                    "is_deepfake": None,
+                    "is_suspicious": None,
+                    "real_probability": None,
+                    "deepfake_probability": None,
+                    "confidence_percent": None,
+                    "model_key": model_key,
+                    "model": model_key,
+                    "device": DEVICE,
+                    "explanation": f"Greška tijekom analize modelom {model_key}: {str(error)}"
+                }
 
-        if model_key == "efficientnet_ffpp_c23":
-            return analyze_with_efficientnet(file_path)
+            model_results.append(result)
 
-        return analyze_with_hf_image_model(file_path, model_key)
+        return combine_model_results(model_results)
 
     except Exception as error:
         return {
@@ -396,8 +410,9 @@ def analyze_image(file_path: Path, model_key: str = DEFAULT_MODEL_KEY) -> dict:
             "real_probability": None,
             "deepfake_probability": None,
             "confidence_percent": None,
-            "model_key": model_key,
-            "model": model_key,
+            "models_used": 0,
+            "model": "Equal-weight ensemble of four deepfake detectors",
             "device": DEVICE,
+            "model_results": [],
             "explanation": f"Greška tijekom analize slike: {str(error)}"
         }
