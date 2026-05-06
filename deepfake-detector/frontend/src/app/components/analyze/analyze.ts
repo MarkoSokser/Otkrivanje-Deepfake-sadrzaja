@@ -4,7 +4,7 @@ import { FileUploadComponent } from '../file-upload/file-upload';
 import { ApiService } from '../../services/api.services';
 import { AnalysisStateService } from '../../services/analysis-state.service';
 import { ToastService } from '../../services/toast.service';
-import { ModelInfo, UploadedFile } from '../../models/analysis-result.model';
+import { AnalysisResult, ModelInfo, UploadedFile } from '../../models/analysis-result.model';
 
 @Component({
   selector: 'app-analyze',
@@ -25,9 +25,20 @@ export class AnalyzeComponent implements OnInit {
   rankedModels = computed<ModelInfo[]>(() => {
     const file = this.selectedFile();
     const models = this.allModels();
+
     if (!file || models.length === 0) return [];
-    const rankKey = file.type === 'image' ? 'image_rank' : 'video_rank';
-    return [...models].sort((a, b) => a[rankKey] - b[rankKey]);
+
+    return models.filter(model => {
+      if (file.type === 'image') {
+        return model.key !== 'videomae_ffpp_c23';
+      }
+
+      if (file.type === 'video') {
+        return model.key === 'videomae_ffpp_c23';
+      }
+
+      return false;
+    });
   });
 
   constructor(
@@ -71,12 +82,14 @@ export class AnalyzeComponent implements OnInit {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  stars(rank: number): number[] {
-    return Array(5 - rank).fill(0);
+  stars(rank: number | null | undefined): number[] {
+    const safeRank = Math.max(0, Math.floor(rank ?? 0));
+    return Array.from({ length: safeRank });
   }
 
-  emptyStars(rank: number): number[] {
-    return Array(rank - 1).fill(0);
+  emptyStars(rank: number | null | undefined): number[] {
+    const safeRank = Math.max(0, Math.min(5, Math.floor(rank ?? 0)));
+    return Array.from({ length: 5 - safeRank });
   }
 
   rankBadgeClass(rank: number): string {
@@ -117,7 +130,8 @@ export class AnalyzeComponent implements OnInit {
     this.apiService.uploadFile(uploaded.file).subscribe({
       next: (result) => {
         this.finishSteps();
-        this.stateService.setResult(result, uploaded);
+        const mapped = this.mapApiResponse(result);
+        this.stateService.setResult(mapped, uploaded);
         this.isLoading.set(false);
         setTimeout(() => this.router.navigate(['/results']), 400);
       },
@@ -130,5 +144,70 @@ export class AnalyzeComponent implements OnInit {
         this.toastService.error(msg);
       },
     });
+  }
+
+  private mapApiResponse(api: any): AnalysisResult {
+    const deepfakeProb =
+      api.analysis?.deepfake_probability ??
+      api.deepfake_probability ??
+      0;
+
+    const confidence = +(deepfakeProb * 100).toFixed(1);
+
+    let label: 'authentic' | 'suspicious' | 'deepfake';
+
+    if (confidence < 40) {
+      label = 'authentic';
+    } else if (confidence < 70) {
+      label = 'suspicious';
+    } else {
+      label = 'deepfake';
+    }
+
+    return {
+      filename: api.filename ?? '',
+      media_type: api.media_type ?? 'image',
+      analysis_mode: api.analysis_mode ?? 'ensemble',
+      models_used:
+        api.analysis?.models_used ??
+        api.models_used ??
+        api.analysis?.model_results?.length ??
+        0,
+
+      is_deepfake: label === 'deepfake',
+      is_suspicious: label === 'suspicious',
+      label,
+
+      deepfake_probability: deepfakeProb,
+      confidence_percent: confidence,
+
+      analysis: {
+        label,
+        deepfake_probability: deepfakeProb,
+        confidence_percent: confidence,
+
+        models_used:
+          api.analysis?.models_used ??
+          api.analysis?.model_results?.length ??
+          0,
+
+        model_results: api.analysis?.model_results ?? [],
+
+        explanation:
+          api.analysis?.explanation ??
+          'Analiza završena bez dodatnog objašnjenja.',
+
+        frames_analyzed:
+          api.analysis?.frames_analyzed ??
+          api.analysis?.frame_count,
+
+        deepfake_frame_count:
+          api.analysis?.deepfake_frame_count ??
+          api.analysis?.suspicious_frames,
+
+        suspicious_frame_count:
+          api.analysis?.suspicious_frame_count
+      }
+    };
   }
 }
