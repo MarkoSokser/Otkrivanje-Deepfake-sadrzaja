@@ -33,8 +33,8 @@ export class HomeComponent {
       answer: 'Vaše datoteke šalju se isključivo na lokalni backend server radi analize i ne pohranjuju se trajno. Nakon obrade rezultat se prikazuje u aplikaciji, a datoteka se briše s poslužitelja. Povijest analiza čuva se samo lokalno u vašem pregledniku.',
     },
     {
-      question: 'Što znači razina pouzdanosti?',
-      answer: 'Razina pouzdanosti (0–100%) pokazuje koliko je model siguran u svoju procjenu. Vrijednosti ispod 40% upućuju na autentičan sadržaj, između 40–70% zahtijevaju dodatnu provjeru, a iznad 70% snažno upućuju na deepfake manipulaciju.',
+      question: 'Što znači vjerojatnost deepfake sadržaja?',
+      answer: 'Vjerojatnost deepfake sadržaja (0–100%) pokazuje procijenjeni rizik da je sadržaj manipuliran ili generiran umjetnom inteligencijom. Vrijednosti ispod 40% upućuju na autentičan sadržaj, između 40–70% označavaju sumnjiv sadržaj koji zahtijeva dodatnu provjeru, dok vrijednosti iznad 70% snažno ukazuju na deepfake manipulaciju.',
     },
   ];
 }

@@ -47,4 +47,10 @@ export class HistoryComponent implements OnInit {
       minute: '2-digit',
     });
   }
+
+  getVerdict(confidence: number): 'REAL' | 'SUSPICIOUS' | 'DEEPFAKE' {
+    if (confidence <= 40) return 'REAL';
+    if (confidence < 70) return 'SUSPICIOUS';
+    return 'DEEPFAKE';
+  }
 }

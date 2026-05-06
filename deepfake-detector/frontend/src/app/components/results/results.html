@@ -1,18 +1,25 @@
 @if (result) {
 <div class="max-w-4xl mx-auto py-10 px-4 flex flex-col gap-8">
 
-  <!-- Verdict banner -->
+  <!-- Label banner -->
   <div
-    class="rounded-2xl p-8 text-center border"
-    [class.bg-green-900]="verdictLabel === 'REAL'"
-    [class.border-green-500]="verdictLabel === 'REAL'"
-    [class.bg-red-900]="verdictLabel === 'DEEPFAKE'"
-    [class.border-red-500]="verdictLabel === 'DEEPFAKE'"
-    [style]="verdictLabel === 'REAL'
-      ? 'box-shadow: 0 8px 40px -8px rgba(22,101,52,0.6)'
+  class="rounded-2xl p-8 text-center border"
+  [class.bg-green-900]="result.label === 'authentic'"
+  [class.border-green-500]="result.label === 'authentic'"
+
+  [class.bg-red-900]="result.label === 'deepfake'"
+  [class.border-red-500]="result.label === 'deepfake'"
+
+  [class.bg-yellow-900]="result.label === 'suspicious'"
+  [class.border-yellow-500]="result.label === 'suspicious'"
+
+  [style]="result.label === 'authentic'
+    ? 'box-shadow: 0 8px 40px -8px rgba(22,101,52,0.6)'
+    : result.label === 'suspicious'
+      ? 'box-shadow: 0 8px 40px -8px rgba(234,179,8,0.5)'
       : 'box-shadow: 0 8px 40px -8px rgba(127,29,29,0.6)'"
-  >
-    @if (verdictLabel === 'REAL') {
+>
+    @if (result.label === 'authentic') {
       <div class="flex justify-center mb-3">
         <div class="animate-bounce-once">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -21,8 +28,12 @@
         </div>
       </div>
       <h1 class="text-3xl font-extrabold text-green-300 mb-2">AUTENTIČAN SADRŽAJ</h1>
-      <p class="text-green-400 text-sm">Ensemble modela nije pronašao znakove manipulacije</p>
-    } @else {
+      <p class="text-green-400 text-sm">Model nije pronašao znakove manipulacije</p>
+    } @else if (result.label === 'suspicious') {
+<div class="flex justify-center mb-3"> <div class="animate-bounce-once"> <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /> </svg> </div> </div>
+      <h1 class="text-3xl font-extrabold text-yellow-300 mb-2">SUMNJIV SADRŽAJ</h1>
+      <p class="text-yellow-400 text-sm">Model nije siguran – potrebna dodatna provjera</p>
+    }@else {
       <div class="flex justify-center mb-3">
         <div class="animate-bounce-once">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -31,7 +42,7 @@
         </div>
       </div>
       <h1 class="text-3xl font-extrabold text-red-300 mb-2">DEEPFAKE SADRŽAJ</h1>
-      <p class="text-red-400 text-sm">Ensemble modela je otkrio znakove manipulacije</p>
+      <p class="text-red-400 text-sm">Model je otkrio znakove manipulacije</p>
     }
 
     <div class="mt-4 flex flex-wrap justify-center gap-3">
@@ -41,16 +52,15 @@
       <span class="bg-black/20 text-gray-300 rounded-full px-3 py-1 text-xs">
         {{ result.media_type === 'image' ? 'Slika' : 'Video' }}
       </span>
-      <span class="bg-black/20 text-gray-300 rounded-full px-3 py-1 text-xs">Ensemble ({{ result.models_used }} modela)</span>
+      <span class="bg-black/20 text-gray-300 rounded-full px-3 py-1 text-xs">{{ result.analysis.model_results }}</span>
     </div>
   </div>
 
   <!-- Confidence meter -->
   <div class="bg-gray-800 rounded-2xl p-6 shadow-lg flex flex-col gap-4">
-    <h2 class="text-white font-semibold text-lg">Razina pouzdanosti (ensemble)</h2>
+    <h2 class="text-white font-semibold text-lg">Vjerojatnost deepfake sadržaja</h2>
     <app-confidence-meter [value]="result.confidence_percent" label="Vjerojatnost deepfake sadržaja" />
     <p class="text-gray-400 text-sm leading-relaxed">{{ confidenceInterpretation }}</p>
-    <p class="text-gray-300 text-sm leading-relaxed border-t border-gray-700 pt-3">{{ verdictReasoning }}</p>
   </div>
 
   <!-- Per-model results -->
@@ -61,16 +71,16 @@
         @for (model of modelResults; track model.model_key) {
           <div
             class="rounded-2xl p-5 border flex flex-col gap-3 shadow-lg"
-            [class]="modelCardBorderClass(model.label)"
+            [class]="modelCardBorderClass(getModelDerivedLabel(model))"
           >
             <!-- Model name + label badge -->
             <div class="flex items-start justify-between gap-2">
               <p class="text-white font-semibold text-sm leading-snug">{{ model.model }}</p>
               <span
                 class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full"
-                [class]="modelLabelClass(model.label)"
+                [class]="modelLabelClass(getModelDerivedLabel(model))"
               >
-                {{ modelLabelText(model.label) }}
+                {{ modelLabelText(getModelDerivedLabel(model)) }}
               </span>
             </div>
 
@@ -80,14 +90,14 @@
                 <div class="flex-1 bg-gray-700 rounded-full h-2">
                   <div
                     class="h-2 rounded-full transition-all duration-500"
-                    [class.bg-red-500]="model.label === 'deepfake'"
-                    [class.bg-orange-400]="model.label === 'suspicious'"
-                    [class.bg-green-500]="model.label === 'authentic'"
-                    [class.bg-gray-500]="model.label === 'error'"
-                    [style.width.%]="model.confidence_percent"
+                    [class.bg-red-500]="getModelDerivedLabel(model) === 'deepfake'"
+                    [class.bg-orange-400]="getModelDerivedLabel(model) === 'suspicious'"
+                    [class.bg-green-500]="getModelDerivedLabel(model) === 'authentic'"
+                    [class.bg-gray-500]="getModelDerivedLabel(model) === 'error'"
+                    [style.width.%]="getModelDeepfakePercent(model)"
                   ></div>
                 </div>
-                <span class="text-white font-bold text-sm shrink-0">{{ model.confidence_percent | number:'1.1-1' }}%</span>
+                <span class="text-white font-bold text-sm shrink-0">{{ getModelDeepfakePercent(model) }}%</span>
               </div>
             }
 
@@ -127,8 +137,8 @@
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
         </svg>
-        <p class="text-gray-400 text-xs uppercase tracking-widest">Pouzdanost</p>
-        <p class="text-white font-bold text-xl">{{ result.confidence_percent | number:'1.1-1' }}%</p>
+        <p class="text-gray-400 text-xs uppercase tracking-widest text-center">Vjerojatnost deepfake sadržaja</p>
+        <p class="text-white font-bold text-xl">{{ result.confidence_percent | number:'1.1-1' }}%%</p>
       </div>
 
       <!-- Models used -->
