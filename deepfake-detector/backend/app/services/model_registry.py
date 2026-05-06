@@ -13,25 +13,25 @@ AVAILABLE_MODELS = {
         ),
         "image_rank": 1,
         "video_rank": 1,
-        "image_rank_reason": "Jedini model treniran direktno na video datasetu (FaceForensics++); uključuje detekciju i izrezivanje lica.",
-        "video_rank_reason": "Jedini model treniran na video datasetu (FF++); detekcija lica po frameu čini ga najpouzdanijim za video analizu.",
+        "image_rank_reason": "Model treniran direktno na FaceForensics++ video datasetu; uključuje detekciju i izrezivanje lica.",
+        "video_rank_reason": "Treniran na video datasetu FF++; detekcija lica po frameu čini ga najpouzdanijim za video analizu.",
     },
-    "wvolf_vit_deepfake": {
-        "name": "ViT Deepfake Detection",
+    "boluobobo_ai_detector_v1": {
+        "name": "ItsNotAI AI Detector v1",
         "provider": "Hugging Face",
-        "model_id": "Wvolf/ViT-Deepfake-Detection",
+        "model_id": "boluobobo/ItsNotAI-ai-detector-v1",
         "type": "image/frame",
         "supports": ["image", "video"],
         "video_mode": "frame_based",
-        "dataset": "140k Real and Fake Faces dataset",
+        "dataset": "AI-generated and real image detection dataset",
         "description": (
-            "ViT model za detekciju deepfake slika treniran na skupu od 140k stvarnih i lažnih lica. "
+            "Image-classification model za razlikovanje AI-generiranih i realnih slika. "
             "Za video se koristi frame-based analiza."
         ),
         "image_rank": 2,
         "video_rank": 3,
-        "image_rank_reason": "ViT treniran na 140k raznolikih lica — široka pokrivenost vrsta slika.",
-        "video_rank_reason": "Treniran na statičnim slikama bez video-specifičnog konteksta; prihvatljiv za frame analizu.",
+        "image_rank_reason": "Kompatibilan s Transformers AutoImageProcessor/AutoModelForImageClassification i fokusiran na AI/fake image detekciju.",
+        "video_rank_reason": "Nije temporalni video model, ali može analizirati pojedinačne frameove.",
     },
     "dima806_vit_deepfake": {
         "name": "ViT Deepfake vs Real Image Detection",
@@ -50,29 +50,56 @@ AVAILABLE_MODELS = {
         "image_rank_reason": "ViT klasifikator fokusiran na lica; solidan ali uži skup podataka od ostalih.",
         "video_rank_reason": "Fokus na klasifikaciju lica čini ga pogodnim za frame-baziranu video analizu.",
     },
-    "vit_deepfake_v2": {
-        "name": "ViT Deep-Fake Detector v2",
+    "king1oo1_deepfake_model": {
+        "name": "SigLIP2 Deepfake Model",
         "provider": "Hugging Face",
-        "model_id": "prithivMLmods/Deep-Fake-Detector-v2-Model",
+        "model_id": "king1oo1/deepfake-model",
         "type": "image/frame",
         "supports": ["image", "video"],
         "video_mode": "frame_based",
-        "dataset": "Real/deepfake image dataset, exact public train split not clearly specified",
+        "dataset": "Diverse multi-source real/fake image dataset with over 330,000 images",
         "description": (
-            "ViT image-classification model za real/deepfake klasifikaciju. "
-            "Za video se koristi frame-based analiza."
+            "SigLIP2 image-classification model za razlikovanje realnih i fake odnosno "
+            "AI-generiranih/deepfake slika. Za video se koristi frame-based analiza."
         ),
         "image_rank": 4,
         "video_rank": 4,
-        "image_rank_reason": "Skup podataka za trening nije javno dokumentiran; niža pouzdanost.",
-        "video_rank_reason": "Skup podataka za trening nije javno dokumentiran; nije optimiziran za video okvire.",
+        "image_rank_reason": "Treniran na velikom multi-source skupu slika, uključujući moderne AI generatore.",
+        "video_rank_reason": "Nije temporalni video model, ali može analizirati pojedinačne frameove.",
     },
 }
 
+VIDEO_MODEL_KEY = "videomae_ffpp_c23"
+
+VIDEO_MODEL = {
+    "key": VIDEO_MODEL_KEY,
+    "name": "VideoMAE FF++ C23 Deepfake Detector",
+    "provider": "Hugging Face",
+    "model_id": "eftt/VideoMae-ffc23-deepfake-detector",
+    "type": "video",
+    "supports": ["video"],
+    "video_mode": "temporal_video_classification",
+    "dataset": "FaceForensics++ C23",
+    "description": (
+        "VideoMAE model treniran za klasifikaciju videa kao originalan ili deepfake. "
+        "Za razliku od image modela, analizira više frameova zajedno."
+    ),
+    "video_rank": 1,
+    "video_rank_reason": (
+        "Poseban video-classification model treniran na FaceForensics++ deepfake video podacima."
+    ),
+}
+
+
+def get_video_model_info() -> dict:
+    return VIDEO_MODEL
 
 ENSEMBLE_MODEL_KEYS = list(AVAILABLE_MODELS.keys())
 
-ENSEMBLE_WEIGHTS = {k: 1 / len(ENSEMBLE_MODEL_KEYS) for k in ENSEMBLE_MODEL_KEYS}
+ENSEMBLE_WEIGHTS = {
+    k: 1 / len(ENSEMBLE_MODEL_KEYS)
+    for k in ENSEMBLE_MODEL_KEYS
+}
 
 
 def get_model_info(model_key: str) -> dict | None:
@@ -83,4 +110,9 @@ def get_model_info(model_key: str) -> dict | None:
 
 
 def get_available_models() -> list[dict]:
-    return [{"key": k, **v} for k, v in AVAILABLE_MODELS.items()]
+    image_models = [
+        {"key": key, **value}
+        for key, value in AVAILABLE_MODELS.items()
+    ]
+
+    return image_models + [VIDEO_MODEL]
