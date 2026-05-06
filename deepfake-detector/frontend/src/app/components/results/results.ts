@@ -87,10 +87,14 @@ export class ResultsComponent implements OnInit {
   }
 
   get confidenceInterpretation(): string {
-    const c = this.result?.confidence_percent ?? 0;
-    if (c <= 40) return 'Model je s visokom sigurnošću klasificirao ovaj sadržaj kao autentičan.';
-    if (c <= 70) return 'Model nije u potpunosti siguran u klasifikaciju. Sadržaj zahtijeva dodatnu provjeru.';
-    return 'Model je s visokom sigurnošću otkrio znakove manipulacije u sadržaju.';
+    const score = this.result?.confidence_percent ?? 0;
+    if (score < 40) {
+      return `Model procjenjuje da je sadržaj AUTENTIČAN (${score.toFixed(1)}%).`;
+    }
+    if (score < 70) {
+      return `Model nije siguran – sadržaj je SUMNJIV (${score.toFixed(1)}%). Preporučuje se dodatna provjera.`;
+    }
+    return `Model detektira visoku vjerojatnost manipulacije (${score.toFixed(1)}%).`;
   }
 
   modelCardBorderClass(label: string): string {
@@ -156,5 +160,21 @@ export class ResultsComponent implements OnInit {
     }).catch(() => {
       this.toastService.error('Kopiranje nije uspjelo. Pokušajte ručno.');
     });
+  }
+
+  getModelDeepfakePercent(model: ModelResult): number {
+     return Number(((model.deepfake_probability ?? 0) * 100).toFixed(2));
+  }
+
+  getModelDerivedLabel(model: ModelResult): 'authentic' | 'suspicious' | 'deepfake' | 'error' {
+    const p = model.deepfake_probability;
+
+    if (p === null || p === undefined) return 'error';
+
+    const score = p * 100;
+
+    if (score < 40) return 'authentic';
+    if (score < 70) return 'suspicious';
+    return 'deepfake';
   }
 }

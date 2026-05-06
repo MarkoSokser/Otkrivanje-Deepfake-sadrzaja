@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 export interface HistoryEntry {
   id: string;
   timestamp: number;
-  verdict: 'REAL' | 'DEEPFAKE';
+  verdict: 'REAL' | 'DEEPFAKE' | 'SUSPICIOUS';
   confidence: number;
   media_type: 'image' | 'video';
   model_used: string;

@@ -49,12 +49,22 @@
             <!-- Verdict badge -->
             <span
               class="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
-              [class.bg-green-900]="entry.verdict === 'REAL'"
-              [class.text-green-300]="entry.verdict === 'REAL'"
-              [class.bg-red-900]="entry.verdict === 'DEEPFAKE'"
-              [class.text-red-300]="entry.verdict === 'DEEPFAKE'"
+              [class.bg-green-900]="getVerdict(entry.confidence) === 'REAL'"
+              [class.text-green-300]="getVerdict(entry.confidence) === 'REAL'"
+
+              [class.bg-yellow-900]="getVerdict(entry.confidence) === 'SUSPICIOUS'"
+              [class.text-yellow-300]="getVerdict(entry.confidence) === 'SUSPICIOUS'"
+
+              [class.bg-red-900]="getVerdict(entry.confidence) === 'DEEPFAKE'"
+              [class.text-red-300]="getVerdict(entry.confidence) === 'DEEPFAKE'"
             >
-              {{ entry.verdict === 'REAL' ? 'Autentičan' : 'Deepfake' }}
+              {{
+                getVerdict(entry.confidence) === 'REAL'
+                  ? 'Autentičan'
+                  : getVerdict(entry.confidence) === 'SUSPICIOUS'
+                    ? 'Sumnjiv'
+                    : 'Deepfake'
+              }}
             </span>
 
             <!-- Info -->
@@ -70,7 +80,7 @@
             <!-- Confidence -->
             <div class="shrink-0 text-right">
               <p class="text-white font-bold text-lg">{{ entry.confidence | number:'1.0-0' }}%</p>
-              <p class="text-gray-500 text-xs">pouzdanost</p>
+              <p class="text-gray-500 text-xs">vjerojatnost deepfake</p>
             </div>
 
             <!-- Expand toggle -->
