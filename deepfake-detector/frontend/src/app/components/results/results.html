@@ -1,18 +1,25 @@
 @if (result) {
 <div class="max-w-4xl mx-auto py-10 px-4 flex flex-col gap-8">
 
-  <!-- Verdict banner -->
+  <!-- Label banner -->
   <div
-    class="rounded-2xl p-8 text-center border"
-    [class.bg-green-900]="result.verdict === 'REAL'"
-    [class.border-green-500]="result.verdict === 'REAL'"
-    [class.bg-red-900]="result.verdict === 'DEEPFAKE'"
-    [class.border-red-500]="result.verdict === 'DEEPFAKE'"
-    [style]="result.verdict === 'REAL'
-      ? 'box-shadow: 0 8px 40px -8px rgba(22,101,52,0.6)'
+  class="rounded-2xl p-8 text-center border"
+  [class.bg-green-900]="result.label === 'authentic'"
+  [class.border-green-500]="result.label === 'authentic'"
+
+  [class.bg-red-900]="result.label === 'deepfake'"
+  [class.border-red-500]="result.label === 'deepfake'"
+
+  [class.bg-yellow-900]="result.label === 'suspicious'"
+  [class.border-yellow-500]="result.label === 'suspicious'"
+
+  [style]="result.label === 'authentic'
+    ? 'box-shadow: 0 8px 40px -8px rgba(22,101,52,0.6)'
+    : result.label === 'suspicious'
+      ? 'box-shadow: 0 8px 40px -8px rgba(234,179,8,0.5)'
       : 'box-shadow: 0 8px 40px -8px rgba(127,29,29,0.6)'"
-  >
-    @if (result.verdict === 'REAL') {
+>
+    @if (result.label === 'authentic') {
       <div class="flex justify-center mb-3">
         <div class="animate-bounce-once">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -22,7 +29,11 @@
       </div>
       <h1 class="text-3xl font-extrabold text-green-300 mb-2">AUTENTIČAN SADRŽAJ</h1>
       <p class="text-green-400 text-sm">Model nije pronašao znakove manipulacije</p>
-    } @else {
+    } @else if (result.label === 'suspicious') {
+<div class="flex justify-center mb-3"> <div class="animate-bounce-once"> <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /> </svg> </div> </div>
+      <h1 class="text-3xl font-extrabold text-yellow-300 mb-2">SUMNJIV SADRŽAJ</h1>
+      <p class="text-yellow-400 text-sm">Model nije siguran – potrebna dodatna provjera</p>
+    }@else {
       <div class="flex justify-center mb-3">
         <div class="animate-bounce-once">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -41,16 +52,70 @@
       <span class="bg-black/20 text-gray-300 rounded-full px-3 py-1 text-xs">
         {{ result.media_type === 'image' ? 'Slika' : 'Video' }}
       </span>
-      <span class="bg-black/20 text-gray-300 rounded-full px-3 py-1 text-xs">{{ result.model_used }}</span>
+      <span class="bg-black/20 text-gray-300 rounded-full px-3 py-1 text-xs">{{ result.analysis.model_results }}</span>
     </div>
   </div>
 
   <!-- Confidence meter -->
   <div class="bg-gray-800 rounded-2xl p-6 shadow-lg flex flex-col gap-4">
-    <h2 class="text-white font-semibold text-lg">Razina pouzdanosti</h2>
-    <app-confidence-meter [value]="result.confidence" label="Vjerojatnost deepfake sadržaja" />
+    <h2 class="text-white font-semibold text-lg">Vjerojatnost deepfake sadržaja</h2>
+    <app-confidence-meter [value]="result.confidence_percent" label="Vjerojatnost deepfake sadržaja" />
     <p class="text-gray-400 text-sm leading-relaxed">{{ confidenceInterpretation }}</p>
   </div>
+
+  <!-- Per-model results -->
+  @if (modelResults.length > 0) {
+    <div>
+      <h2 class="text-white font-semibold text-lg mb-4">Rezultati po modelu</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        @for (model of modelResults; track model.model_key) {
+          <div
+            class="rounded-2xl p-5 border flex flex-col gap-3 shadow-lg"
+            [class]="modelCardBorderClass(getModelDerivedLabel(model))"
+          >
+            <!-- Model name + label badge -->
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-white font-semibold text-sm leading-snug">{{ model.model }}</p>
+              <span
+                class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full"
+                [class]="modelLabelClass(getModelDerivedLabel(model))"
+              >
+                {{ modelLabelText(getModelDerivedLabel(model)) }}
+              </span>
+            </div>
+
+            <!-- Confidence bar -->
+            @if (model.confidence_percent !== null) {
+              <div class="flex items-center gap-3">
+                <div class="flex-1 bg-gray-700 rounded-full h-2">
+                  <div
+                    class="h-2 rounded-full transition-all duration-500"
+                    [class.bg-red-500]="getModelDerivedLabel(model) === 'deepfake'"
+                    [class.bg-orange-400]="getModelDerivedLabel(model) === 'suspicious'"
+                    [class.bg-green-500]="getModelDerivedLabel(model) === 'authentic'"
+                    [class.bg-gray-500]="getModelDerivedLabel(model) === 'error'"
+                    [style.width.%]="getModelDeepfakePercent(model)"
+                  ></div>
+                </div>
+                <span class="text-white font-bold text-sm shrink-0">{{ getModelDeepfakePercent(model) }}%</span>
+              </div>
+            }
+
+            <!-- Dataset + face detection info -->
+            <div class="flex flex-col gap-1 text-xs text-gray-500">
+              <span>Skup podataka: <span class="text-gray-400">{{ model.dataset }}</span></span>
+              @if (model.face_detected !== null) {
+                <span>Detekcija lica: <span [class.text-green-400]="model.face_detected" [class.text-gray-400]="!model.face_detected">{{ model.face_detected ? 'Pronađeno' : 'Nije pronađeno' }}</span></span>
+              }
+            </div>
+
+            <!-- Model explanation -->
+            <p class="text-gray-400 text-xs leading-relaxed border-t border-gray-700 pt-3">{{ model.explanation }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   <!-- Statistics cards -->
   <div>
@@ -72,49 +137,49 @@
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
         </svg>
-        <p class="text-gray-400 text-xs uppercase tracking-widest">Pouzdanost</p>
-        <p class="text-white font-bold text-xl">{{ result.confidence | number:'1.1-1' }}%</p>
+        <p class="text-gray-400 text-xs uppercase tracking-widest text-center">Vjerojatnost deepfake sadržaja</p>
+        <p class="text-white font-bold text-xl">{{ result.confidence_percent | number:'1.1-1' }}%%</p>
       </div>
 
-      <!-- Model used -->
+      <!-- Models used -->
       <div class="bg-gray-800 rounded-2xl p-5 flex flex-col items-center gap-2 shadow-lg col-span-2 md:col-span-1 hover:-translate-y-0.5 transition-transform duration-150">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
         </svg>
-        <p class="text-gray-400 text-xs uppercase tracking-widest">Korišteni model</p>
-        <p class="text-white font-bold text-xl">{{ result.model_used }}</p>
+        <p class="text-gray-400 text-xs uppercase tracking-widest">Modeli</p>
+        <p class="text-white font-bold text-xl">{{ result.models_used }} / 4</p>
       </div>
 
       <!-- Video-only stats -->
-      @if (result.media_type === 'video' && result.frame_count !== undefined) {
+      @if (result.media_type === 'video' && result.analysis.frames_analyzed !== undefined) {
         <div class="bg-gray-800 rounded-2xl p-5 flex flex-col items-center gap-2 shadow-lg hover:-translate-y-0.5 transition-transform duration-150">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375z" />
           </svg>
-          <p class="text-gray-400 text-xs uppercase tracking-widest">Broj frameova</p>
-          <p class="text-white font-bold text-xl">{{ result.frame_count }}</p>
+          <p class="text-gray-400 text-xs uppercase tracking-widest">Analizirani okviri</p>
+          <p class="text-white font-bold text-xl">{{ result.analysis.frames_analyzed }}</p>
         </div>
       }
 
-      @if (result.media_type === 'video' && result.suspicious_frames !== undefined) {
+      @if (result.media_type === 'video' && result.analysis.deepfake_frame_count !== undefined) {
         <div class="bg-gray-800 rounded-2xl p-5 flex flex-col items-center gap-2 shadow-lg hover:-translate-y-0.5 transition-transform duration-150">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
-          <p class="text-gray-400 text-xs uppercase tracking-widest">Sumnjivi frameovi</p>
-          <p class="text-white font-bold text-xl">{{ result.suspicious_frames }}</p>
+          <p class="text-gray-400 text-xs uppercase tracking-widest">Deepfake okviri</p>
+          <p class="text-white font-bold text-xl">{{ result.analysis.deepfake_frame_count }}</p>
         </div>
       }
     </div>
   </div>
 
-  <!-- Explanation -->
+  <!-- Ensemble explanation -->
   <div class="bg-gray-800 rounded-2xl p-6 shadow-lg">
-    <h2 class="text-white font-semibold text-lg mb-3">Obrazloženje rezultata</h2>
-    <p class="text-gray-300 leading-relaxed">{{ result.explanation }}</p>
+    <h2 class="text-white font-semibold text-lg mb-3">Obrazloženje ensemble rezultata</h2>
+    <p class="text-gray-300 leading-relaxed">{{ result.analysis.explanation }}</p>
   </div>
 
   <!-- Uploaded file preview -->

@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AnalysisResult } from '../models/analysis-result.model';
+import { AnalysisResult, ModelInfo } from '../models/analysis-result.model';
+
+export interface ModelsResponse {
+  analysis_mode: string;
+  description: string;
+  available_models: ModelInfo[];
+  supported_formats: string[];
+}
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +28,7 @@ export class ApiService {
     return this.http.get<{ status: string }>(`${this.apiUrl}/health`);
   }
 
-  getModels(): Observable<{ models: string[] }> {
-    return this.http.get<{ models: string[] }>(`${this.apiUrl}/models`);
+  getModels(): Observable<ModelsResponse> {
+    return this.http.get<ModelsResponse>(`${this.apiUrl}/models`);
   }
 }

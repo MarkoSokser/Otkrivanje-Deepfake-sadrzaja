@@ -15,7 +15,7 @@ export class ConfidenceMeterComponent implements OnChanges {
   barGradient = 'from-green-500 to-green-400';
 
   ngOnChanges(): void {
-    this.displayValue = Math.min(100, Math.max(0, Math.round(this.value)));
+    this.displayValue = Math.min(100, Math.max(0, Number(this.value.toFixed(2))));
     if (this.value <= 40) {
       this.barGradient = 'from-green-600 to-green-400';
     } else if (this.value <= 70) {

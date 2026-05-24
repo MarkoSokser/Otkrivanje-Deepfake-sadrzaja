@@ -28,9 +28,8 @@ def get_models():
     return {
         "analysis_mode": "equal_weight_ensemble",
         "description": (
-            "Sustav uvijek pokreće sva četiri dostupna modela. "
-            "Konačni rezultat računa se kao prosjek njihovih deepfake vjerojatnosti "
-            "s jednakim težinama."
+            "Za slike se koriste četiri image/frame modela s jednakim težinama. "
+            "Za video se koristi poseban VideoMAE video model, bez korištenja image modela."
         ),
         "available_models": get_available_models(),
         "usage": {
